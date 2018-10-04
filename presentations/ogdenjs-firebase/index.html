@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Ogden JS | Firestore</title>
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section data-markdown>
+        <textarea data-template>
+# Offline First Apps
+
+## Getting started with Firestore
+
+### Ogden JS
+
+#### @jloosli
+					</textarea>
+        </section>
+        <section data-markdown>
+        <textarea data-template>
+## The problem with Ogden JS
+
+* No App <!-- .element: class="fragment" -->
+* No Offline Access <!-- .element: class="fragment" -->
+        </textarea>
+        </section>
+        <section data-markdown>
+        <textarea data-template>
+## Using Firestore
+
+* Create new app at https://console.firebase.google.com
+* Populate with some initial values
+  * Speakers
+  * Topics
+  * Meetings
+        </textarea>
+        </section>
+        <section data-markdown><textarea data-template>
+## Create the Web App
+
+* https://stackblitz.com
+* Load dependencies
+  * firebase
+  * rxjs
+  * rxfire
+        </textarea></section>
+        <section data-markdown><textarea data-template>
+## Add firebase/rxjs
+
+    import firebase from 'firebase/app';
+    import 'firebase/firestore';
+    import { collectionData } from 'rxfire/firestore';
+
+    const config = {/* Get from Firebase Console */ }
+
+    const firestore = firebase.initializeApp(config).firestore();
+    const settings = { timestampsInSnapshots: true };
+    firestore.settings(settings);
+
+        </textarea></section>
+        <section data-markdown><textarea data-template>
+## Look at your data
+
+    const speakersRef = firestore.collection('speakers');
+    const topicsRef = firestore.collection('topics');
+    const meetingsRef = firestore.collection('meetings');
+
+    const speakers$: Observable<any[]> = collectionData(speakersRef, 'id');
+    const topics$: Observable<any[]> = collectionData(topicsRef, 'id');
+    const meetings$: Observable<any[]> = collectionData(meetingsRef);
+            
+    speakers$.subscribe(speakers=>console.log(speakers);
+    topics$.subscribe(topics=>console.log(topics);
+    meetings$.subscribe(meetings=>console.log(meetings);
+            
+        </textarea></section>
+        <section data-markdown><textarea data-template>
+## Set up template
+
+    <div id="speakers">
+      <h2>Speakers</h2>
+      <ul></ul>
+    </div>
+    <div id="topics">
+      <h2>Topics</h2>
+      <ul></ul>
+    </div>
+    <div id="meetings">
+      <h2>Meetings</h2>
+      <ul></ul>
+    </div>
+        </textarea></section>
+        <section data-markdown><textarea data-template>
+## Populate the template with streaming data
+
+    .subscribe({
+      const lis = [];
+      speakers.map(speaker => lis.push(`<li>${speaker.name}</li>`))
+      speakersDiv.querySelector('ul').innerHTML = lis.join('');
+    })
+        </textarea></section>
+        <section data-markdown><textarea data-template>
+## Combine data (combineLatest)
+
+    combineLatest(speakers$, topics$, meetings$)
+        </textarea></section>
+        <section data-markdown><textarea data-template>
+## Add new speakers
+
+    <h3>Add Speakers</h3>
+    <form>
+      <label for='speaker-name'>Name</label>
+      <input id='speaker-name' name='speaker_name' />
+      <button >Add Speaker</button>
+    </form>
+
+        </textarea></section>
+        <section data-markdown><textarea data-template>
+## Add listener
+
+    fromEvent(speakerForm, 'submit').subscribe((event) => {
+      event.preventDefault();
+      const name = speakerName.value;
+      speakersRef.add({
+        name: name,
+      });
+    });
+        </textarea></section>
+        <section data-markdown><textarea data-template>
+## We forgot offline capability!
+
+<div class="fragment">
+<pre>
+    firestore.enablePersistence();
+</pre>
+</div>
+        </textarea></section>
+        <section data-markdown><textarea data-template>
+## References
+
+* [Intro to rxfire](https://firebase.googleblog.com/2018/09/introducing-rxfire-easy-async-firebase.html)
+* https://www.pwabuilder.com/
+* https://github.com/jloosli/ogdenjs-firestore
+
+        </textarea></section>
+    </div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+    // More info about config & dependencies:
+    // - https://github.com/hakimel/reveal.js#configuration
+    // - https://github.com/hakimel/reveal.js#dependencies
+    Reveal.initialize({
+        history: true,
+        slideNumber: true,
+        dependencies: [
+            {src: 'plugin/markdown/marked.js'},
+            {src: 'plugin/markdown/markdown.js'},
+            {src: 'plugin/notes/notes.js', async: true},
+            {
+                src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+                    hljs.initHighlightingOnLoad();
+                }
+            }
+        ]
+    });
+</script>
+</body>
+</html>
